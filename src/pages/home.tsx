@@ -73,7 +73,7 @@ function HomePage() {
     setBalance(-form.getValues("balance"));
     setDialogOpen(false);
     setSuccessDialogOpen(true);
-    form.reset();
+  
   };
 
   return (
