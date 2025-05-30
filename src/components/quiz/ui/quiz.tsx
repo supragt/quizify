@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/app/store/app.store";
 import type { Question } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
@@ -20,19 +20,23 @@ function Quiz({
   const setBalance = useAppStore((state) => state.setBalance);
   const setResults = useAppStore((state) => state.setResults);
 
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+
   useEffect(() => {
     if (selected !== null) return;
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
+          if (timerRef.current) clearInterval(timerRef.current);
           handleAnswer(null);
           return 15;
         }
         return prev - 1;
       });
     }, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [current, selected]);
 
   const handleAnswer = (index: number | null) => {
@@ -66,6 +70,11 @@ function Quiz({
     }, 1000);
   };
 
+  const handleSkip = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    handleAnswer(null);
+  }
+
   if (isAnswered) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -87,32 +96,35 @@ function Quiz({
   }
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center size-full items-center">
       <div className="w-full max-w-xl">
-        <h2 className="mb-4 text-xl font-bold">
-          {questions[current].question}
-        </h2>
-        <div className="mb-4">
-          Осталось времени: <span className="font-bold">{timeLeft}</span> сек.
-        </div>
-        <div className="grid gap-2">
-          {questions[current].answers.map((answer, i) => (
-            <button
-              key={i}
-              onClick={() => handleAnswer(i)}
-              className={`cursor-pointer rounded border px-4 py-2 ${
-                selected === null
-                  ? "hover:bg-sidebar-accent"
-                  : i === questions[current].correct
-                    ? "bg-green-500"
-                    : selected === i
-                      ? "bg-red-500"
-                      : ""
-              }`}
-            >
-              {answer}
-            </button>
-          ))}
+        <div className="rounded-lg border p-6 flex flex-col">
+          <h2 className="mb-4 text-xl text-center font-bold">
+            {questions[current].question}
+          </h2>
+          <div className="mb-4 text-center">
+            Осталось времени: <span className="font-bold">{timeLeft}</span> сек.
+          </div>
+          <div className="grid gap-2">
+            {questions[current].answers.map((answer, i) => (
+              <button
+                key={i}
+                onClick={() => handleAnswer(i)}
+                className={`cursor-pointer rounded border px-4 py-2 ${
+                  selected === null
+                    ? "hover:bg-sidebar-accent"
+                    : i === questions[current].correct
+                      ? "bg-green-700"
+                      : selected === i
+                        ? "bg-red-700"
+                        : ""
+                }`}
+              >
+                {answer}
+              </button>
+            ))}
+          </div>
+          <Button onClick={handleSkip} className='mt-4 self-center'>Пропустить</Button>
         </div>
       </div>
     </div>

@@ -14,7 +14,7 @@ function ArtPage() {
           {Object.values(artQuestions).map((questions, index) => (
             <div
               key={index}
-              className="hover:bg-sidebar-accent cursor-pointer rounded-md border p-4 transition-colors"
+              className="hover:bg-sidebar-accent cursor-pointer min-w-[250px] rounded-md border p-4 transition-colors"
               onClick={() => setQuestions(shuffleArray(questions))}
             >
               <span className="text-sm">
